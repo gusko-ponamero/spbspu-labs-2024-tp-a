@@ -339,4 +339,22 @@ bool isSame(const Polygon& p1, const Polygon& p2)
         auto comp = std::bind(isSame, _1, mask);
         out << std::count_if(polygons.cbegin(), polygons.cend(), comp) << '\n';
     }
+void lessArea(std::istream& in, std::ostream& out, const std::vector< Polygon >& polygons)
+    {
+        Polygon polygon;
+        in >> polygon;
+        if (!in || in.peek() != '\n')
+        {
+            throw std::logic_error("Invalid polygon to compare");
+        }
+        using namespace std::placeholders;
+        auto predicate = std::bind(areaComparator, _1, std::ref(polygon));
+        size_t result = std::count_if(polygons.cbegin(), polygons.cend(), predicate);
+        out << result;
+    }
+
+    bool areaComparator(const Polygon& lhs, const Polygon& rhs)
+    {
+        return getAreaPolygon(lhs) < getAreaPolygon(rhs);
+    }
 }
