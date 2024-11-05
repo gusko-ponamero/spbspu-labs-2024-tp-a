@@ -1,5 +1,5 @@
 #include "DataStruct.h"
-#include "Delimeter.h"
+#include <Delimeter.h>
 #include <algorithm>
 #include <iostream>
 #include <iterator>

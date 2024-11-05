@@ -1,5 +1,5 @@
 #include "DataStruct.h"
-#include "Delimeter.h"
+#include <Delimeter.h>
 #include "ioFormatGuard.h"
 #include <iostream>
 #include <iomanip>
