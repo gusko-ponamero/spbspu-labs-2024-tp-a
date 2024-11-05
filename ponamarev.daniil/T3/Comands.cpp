@@ -255,4 +255,30 @@ void count(std::istream& in, std::ostream& out, const std::vector< Polygon >& po
         auto it_reverse = std::find_if(polygon.points.cbegin(), polygon.points.cend(), pred2);
         return it_forward != polygon.points.cend() || it_reverse != polygon.points.cend();
     }
+bool isPerms(const Polygon& polygon, const Polygon& sample)
+    {
+        if (polygon.points.size() != sample.points.size())
+        {
+            return false;
+        }
+        using namespace std::placeholders;
+        auto pred = std::bind(isPoint, _1, sample);
+        size_t count = std::count_if(polygon.points.cbegin(), polygon.points.cend(), pred);
+        size_t num = std::distance(polygon.points.cbegin(), polygon.points.cend());
+        return count == num;
+    }
+
+    void perms(std::istream& in, std::ostream& out, const std::vector< Polygon >& polygons)
+    {
+        Polygon sample;
+        in >> sample;
+        if (!in || in.peek() != '\n' || sample.points.empty())
+        {
+            throw std::logic_error("<INVALID COMMAND>");
+        }
+        using namespace std::placeholders;
+        auto pred = std::bind(isPerms, _1, sample);
+        size_t count = std::count_if(polygons.cbegin(), polygons.cend(), pred);
+        out << count << '\n';
+    }
 }
