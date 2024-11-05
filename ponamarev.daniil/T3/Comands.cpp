@@ -145,4 +145,60 @@ void max(std::istream& in, std::ostream& out, const std::vector< Polygon >& poly
         }
         return *max;
     }
+void min(std::istream& in, std::ostream& out, const std::vector< Polygon >& polygons)
+    {
+        std::map< std::string, std::function< double() > > minArea;
+        {
+            minArea["AREA"] = std::bind(getAreaMin, polygons);
+        }
+
+        std::map< std::string, std::function< size_t() > > minTop;
+        {
+            minTop["TOP"] = std::bind(getTopMin, polygons);
+        }
+
+        std::string arg;
+        in >> arg;
+        if (polygons.empty())
+        {
+            throw std::logic_error("<INVALID COMMAND>");
+        }
+        if (arg == "TOP")
+        {
+            out << minTop[arg]() << '\n';
+        }
+        else
+        {
+            out << std::fixed << std::setprecision(1);
+            out << minArea[arg]() << '\n';
+        }
+    }
+
+    double getAreaMin(const std::vector< Polygon >& polygons)
+    {
+        std::vector< double > area;
+        area.reserve(polygons.size());
+        std::transform(polygons.cbegin(), polygons.cend(), std::back_inserter(area), getAreaPolygon);
+        auto min = std::min_element(area.cbegin(), area.cend());
+        if (min == area.cend())
+        {
+            throw std::logic_error("<INVALID COMMAND>");
+        }
+        return *min;
+    }
+
+
+
+    size_t getTopMin(const std::vector< Polygon >& polygons)
+    {
+        std::vector< double > tops;
+        tops.reserve(polygons.size());
+        std::transform(polygons.cbegin(), polygons.cend(), std::back_inserter(tops), getTop);
+        auto min = std::min_element(tops.cbegin(), tops.cend());
+        if (min == tops.cend())
+        {
+            throw std::logic_error("<INVALID COMMAND>");
+        }
+        return *min;
+    }
 }
