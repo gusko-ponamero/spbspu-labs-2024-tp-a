@@ -4,7 +4,7 @@
 #include <iterator>
 #include <numeric>
 
-#include "Delimeter.h"
+#include <Delimeter.h>
 
 std::istream& ponamarev::operator>>(std::istream & in, Point & point)
 {
