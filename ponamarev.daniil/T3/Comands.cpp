@@ -281,4 +281,62 @@ bool isPerms(const Polygon& polygon, const Polygon& sample)
         size_t count = std::count_if(polygons.cbegin(), polygons.cend(), pred);
         out << count << '\n';
     }
+bool isSame(const Polygon& p1, const Polygon& p2)
+    {
+        if (p1.points.size() != p2.points.size())
+        {
+            return false;
+        }
+        using namespace std::placeholders;
+        auto comp = std::bind(&isSameTwo, p1.points[0], _1, p1, p2);
+        return std::find_if(p2.points.cbegin(), p2.points.cend(), comp) != p2.points.cend();
+    }
+
+    bool deltaCheck(const Point& point, const Polygon& polygon, const Point& delta)
+    {
+        using namespace std::placeholders;
+        auto comp = std::bind(&isSameDelta, point, _1, delta);
+        return std::find_if(polygon.points.cbegin(), polygon.points.cend(), comp) != polygon.points.cend();
+    }
+
+    bool isSameDelta(const Point& p1, const Point& p2, const Point& delta)
+    {
+        return (p2.x - p1.x == delta.x) && (p2.y - p1.y == delta.y);
+    }
+
+    bool isSameTwo(const Point& p1, const Point& p2, const Polygon& pol1, const Polygon& pol2)
+    {
+        Point delta = getDelta(p1, p2);
+        using namespace std::placeholders;
+        auto compWithDelta = std::bind(&deltaCheck, _1, pol2, delta);
+        using diff_t = std::vector< Polygon >::difference_type;
+        auto pol1CBegin = pol1.points.cbegin();
+        auto pol1CEnd = pol1.points.cend();
+        return std::count_if(pol1CBegin, pol1CEnd, compWithDelta) == static_cast<diff_t>(pol1.points.size());
+    }
+    Point getDelta(const Point& p1, const Point& p2)
+    {
+        return { p2.x - p1.x, p2.y - p1.y };
+    }
+    void same(std::istream& in, std::ostream& out, const std::vector< Polygon >& polygons)
+    {
+        std::istream::sentry sentry(in);
+        if (!sentry)
+        {
+            return;
+        }
+        Polygon mask;
+        in >> mask;
+        if (!in || in.peek() != '\n')
+        {
+            throw std::invalid_argument("<INVALID ARGUMENT>");
+        }
+        if (mask.points.size() < 3)
+        {
+            throw std::logic_error("<MASK CANT HAVE LESS THAN 3 TOP>");
+        }
+        using namespace std::placeholders;
+        auto comp = std::bind(isSame, _1, mask);
+        out << std::count_if(polygons.cbegin(), polygons.cend(), comp) << '\n';
+    }
 }
