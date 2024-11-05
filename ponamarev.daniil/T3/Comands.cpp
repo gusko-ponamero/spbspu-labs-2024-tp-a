@@ -86,4 +86,63 @@ namespace ponamarev
         using namespace std::placeholders;
         return getAreaIf(polygons, std::bind(isNum, _1, number));
     }
+void max(std::istream& in, std::ostream& out, const std::vector< Polygon >& polygons)
+    {
+        std::map< std::string, std::function< double() > > maxArea;
+        {
+            maxArea["AREA"] = std::bind(getAreaMax, polygons);
+        }
+
+        std::map< std::string, std::function< size_t() > > maxTop;
+        {
+            maxTop["TOP"] = std::bind(getTopMax, polygons);
+        }
+
+        std::string arg;
+        in >> arg;
+        if (polygons.empty())
+        {
+            throw std::logic_error("<INVALID COMMAND>");
+        }
+        if (arg == "TOP")
+        {
+            out << maxTop[arg]() << '\n';
+        }
+        else
+        {
+            out << std::fixed << std::setprecision(1);
+            out << maxArea[arg]() << '\n';
+        }
+    }
+
+    double getAreaMax(const std::vector< Polygon >& polygons)
+    {
+        std::vector< double > area;
+        area.reserve(polygons.size());
+        std::transform(polygons.cbegin(), polygons.cend(), std::back_inserter(area), getAreaPolygon);
+        auto max = std::max_element(area.cbegin(), area.cend());
+        if (max == area.cend())
+        {
+            throw std::logic_error("<INVALID COMMAND>");
+        }
+        return *max;
+    }
+
+    size_t getTop(const Polygon& polygon)
+    {
+        return polygon.points.size();
+    }
+
+    size_t getTopMax(const std::vector< Polygon >& polygons)
+    {
+        std::vector< double > top;
+        top.reserve(polygons.size());
+        std::transform(polygons.cbegin(), polygons.cend(), std::back_inserter(top), getTop);
+        auto max = std::max_element(top.cbegin(), top.cend());
+        if (max == top.cend())
+        {
+            throw std::logic_error("<INVALID COMMAND>");
+        }
+        return *max;
+    }
 }
