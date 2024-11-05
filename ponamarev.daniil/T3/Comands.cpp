@@ -187,8 +187,6 @@ void min(std::istream& in, std::ostream& out, const std::vector< Polygon >& poly
         return *min;
     }
 
-
-
     size_t getTopMin(const std::vector< Polygon >& polygons)
     {
         std::vector< double > tops;
@@ -200,5 +198,61 @@ void min(std::istream& in, std::ostream& out, const std::vector< Polygon >& poly
             throw std::logic_error("<INVALID COMMAND>");
         }
         return *min;
+    }
+void count(std::istream& in, std::ostream& out, const std::vector< Polygon >& polygons)
+    {
+        std::map< std::string, std::function< size_t() > > count;
+        {
+            count["EVEN"] = std::bind(getCountEven, polygons);
+            count["ODD"] = std::bind(getCountOdd, polygons);
+        }
+        std::string arg;
+        in >> arg;
+        if (arg == "EVEN" || arg == "ODD")
+        {
+            out << count[arg]() << '\n';
+        }
+        else
+        {
+            size_t num = std::stoull(arg);
+            if (num < 3)
+            {
+                throw std::logic_error("<INVALID COMMAND>");
+            }
+            size_t res = getCountNum(polygons, num);
+            out << res << "\n";
+        }
+    }
+
+    size_t getCountEven(const std::vector< Polygon >& polygons)
+    {
+        return std::count_if(polygons.cbegin(), polygons.cend(), isEven);
+    }
+
+    size_t getCountOdd(const std::vector< Polygon >& polygons)
+    {
+        return std::count_if(polygons.cbegin(), polygons.cend(), isOdd);
+    }
+
+    size_t getCountNum(const std::vector< Polygon >& polygons, size_t number)
+    {
+        using namespace std::placeholders;
+        return std::count_if(polygons.cbegin(), polygons.cend(), std::bind(isNum, _1, number));
+    }
+
+    bool isEqual(const Point& point1, const Point& point2)
+    {
+        return point1 == point2;
+    }
+
+    bool isPoint(const Point& point, const Polygon& polygon)
+    {
+        Point sample = point;
+        auto pred1 = std::bind(isEqual, std::placeholders::_1, sample);
+        auto it_forward = std::find_if(polygon.points.cbegin(), polygon.points.cend(), pred1);
+        Point inverted({ point.y, point.x });
+        auto pred2 = std::bind(isEqual, std::placeholders::_1, inverted);
+        auto it_reverse = std::find_if(polygon.points.cbegin(), polygon.points.cend(), pred2);
+        return it_forward != polygon.points.cend() || it_reverse != polygon.points.cend();
     }
 }
